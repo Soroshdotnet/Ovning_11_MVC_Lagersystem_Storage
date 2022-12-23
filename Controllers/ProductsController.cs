@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Storage.Data;
+using Storage.Models;
 
-namespace Storage.Models
+namespace Storage.Controllers
 {
     public class ProductsController : Controller
     {
@@ -19,11 +20,47 @@ namespace Storage.Models
         }
 
         // GET: Products
+        //public async Task<IActionResult> Index()
+        //{
+        //    return View(await _context.Product.ToListAsync());
+        //}
+
         public async Task<IActionResult> Index()
         {
-              return _context.Product != null ? 
-                          View(await _context.Product.ToListAsync()) :
-                          Problem("Entity set 'StorageContext.Product'  is null.");
+            //var products = await _context.Product.ToListAsync();
+
+            //List<ProductViewModel> model = new List<ProductViewModel>();
+
+            //foreach (var p in products)
+            //{
+            //    var productViewModel = new ProductViewModel
+            //    {
+            //        Id = p.Id,
+            //        Name = p.Name,
+            //        Count = p.Count,
+            //        Price = p.Price,
+            //        InventoryValue = p.Price * p.Count
+            //    };
+
+            //    model.Add(productViewModel);
+
+            //}
+
+            //---------------------------------------
+
+            var model = await _context.Product
+                .Select(p => new ProductViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Count = p.Count,
+                    Price = p.Price,
+                    InventoryValue = p.Price * p.Count
+                })
+               .ToListAsync();
+
+            return View("Index2", model);
+
         }
 
         // GET: Products/Details/5
@@ -149,14 +186,20 @@ namespace Storage.Models
             {
                 _context.Product.Remove(product);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)
         {
-          return (_context.Product?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Product?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+
+
+
+
+
     }
 }
